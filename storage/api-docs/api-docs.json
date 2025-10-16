@@ -1,0 +1,80 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Node Tree API Documentation",
+        "description": "API RESTful para la gestión de un árbol de nodos.",
+        "contact": {
+            "email": "idelfonsosanchez.snchez.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://my-default-host.com",
+            "description": "Servidor de la API del Árbol de Nodos"
+        }
+    ],
+    "paths": {
+        "/api/nodes": {
+            "post": {
+                "tags": [
+                    "Nodos"
+                ],
+                "summary": "Crea un nuevo nodo en el árbol",
+                "operationId": "createNode",
+                "requestBody": {
+                    "description": "ID del nodo padre (opcional).",
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "parent_id"
+                                ],
+                                "properties": {
+                                    "parent_id": {
+                                        "description": "ID del nodo padre. Puede ser nulo para crear un nodo raíz.",
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Nodo creado exitosamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Nodo creado exitosamente."
+                                        },
+                                        "node_id": {
+                                            "type": "integer",
+                                            "example": 5
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación."
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Nodos",
+            "description": "Operaciones sobre la estructura de nodos del árbol"
+        }
+    ]
+}
