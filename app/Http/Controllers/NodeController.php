@@ -96,10 +96,38 @@ class NodeController extends Controller
     }
 
     /**
-     * GET /api/nodes/roots - Listar nodos padres (raíz)
-     *
-     * @param Request $request
-     * @return void
+     * @OA\Get(
+     * path="/api/nodes/roots",
+     * operationId="listRootNodes",
+     * tags={"Nodos"},
+     * summary="Lista todos los nodos raíz (sin padre).",
+     * @OA\Parameter(
+     * name="per_page",
+     * in="query",
+     * required=false,
+     * description="Cantidad de resultados por página.",
+     * @OA\Schema(type="integer", default=15)
+     * ),
+     * @OA\Parameter(
+     * name="X-Locale",
+     * in="header",
+     * required=false,
+     * description="Idioma ISO 639-1 para traducir el campo 'title' (ej: 'es', 'en').",
+     * @OA\Schema(type="string", default="en")
+     * ),
+     * @OA\Parameter(
+     * name="X-Timezone",
+     * in="header",
+     * required=false,
+     * description="Zona horaria IANA para formatear el campo 'created_at' (ej: 'America/Santiago', 'UTC').",
+     * @OA\Schema(type="string", default="UTC")
+     * ),
+     * @OA\Response(
+     * response=200,
+     * description="Lista paginada de nodos raíz.",
+     * @OA\JsonContent(ref="#/components/schemas/PaginatedNodeList")
+     * )
+     * )
      */
     public function listRoots(Request $request)
     {
@@ -112,12 +140,51 @@ class NodeController extends Controller
         return response()->json($nodes);
     }
 
+
     /**
-     * Undocumented function
-     *GET /api/nodes/{nodeId}/children - Listar nodos hijos
-     * @param Request $request
-     * @param integer $nodeId
-     * @return void
+     * @OA\Get(
+     * path="/api/nodes/{nodeId}/children",
+     * operationId="listChildren",
+     * tags={"Nodos"},
+     * summary="Lista los nodos hijos de un nodo padre específico.",
+     * @OA\Parameter(
+     * name="nodeId",
+     * in="path",
+     * required=true,
+     * description="ID del nodo padre del que se listarán los hijos.",
+     * @OA\Schema(type="integer", example=1)
+     * ),
+     * @OA\Parameter(
+     * name="depth",
+     * in="query",
+     * required=false,
+     * description="Profundidad de navegación. Si no se pasa o es 1, devuelve solo hijos directos.",
+     * @OA\Schema(type="integer", default=1, enum={1, 2, 3})
+     * ),
+     * @OA\Parameter(
+     * name="X-Locale",
+     * in="header",
+     * required=false,
+     * description="Idioma ISO 639-1 para traducir el campo 'title'.",
+     * @OA\Schema(type="string", default="en")
+     * ),
+     * @OA\Parameter(
+     * name="X-Timezone",
+     * in="header",
+     * required=false,
+     * description="Zona horaria IANA para formatear el campo 'created_at'.",
+     * @OA\Schema(type="string", default="UTC")
+     * ),
+     * @OA\Response(
+     * response=200,
+     * description="Lista paginada de nodos hijos.",
+     * @OA\JsonContent(ref="#/components/schemas/PaginatedNodeList")
+     * ),
+     * @OA\Response(
+     * response=404,
+     * description="Nodo padre no encontrado."
+     * )
+     * )
      */
     public function listChildren(Request $request, int $nodeId)
     {
@@ -133,11 +200,40 @@ class NodeController extends Controller
         }
     }
 
+
     /**
-     * DELETE /api/nodes/{nodeId} - Eliminar nodo
-     *
-     * @param integer $nodeId
-     * @return void
+     * @OA\Delete(
+     * path="/api/nodes/{nodeId}",
+     * operationId="deleteNode",
+     * tags={"Nodos"},
+     * summary="Elimina un nodo específico.",
+     * description="Solo se puede eliminar un nodo si NO tiene hijos.",
+     * @OA\Parameter(
+     * name="nodeId",
+     * in="path",
+     * required=true,
+     * description="ID del nodo a eliminar.",
+     * @OA\Schema(type="integer", example=3)
+     * ),
+     * @OA\Response(
+     * response=200,
+     * description="Nodo eliminado exitosamente.",
+     * @OA\JsonContent(
+     * @OA\Property(property="message", type="string", example="Nodo eliminado exitosamente.")
+     * )
+     * ),
+     * @OA\Response(
+     * response=404,
+     * description="Nodo no encontrado."
+     * ),
+     * @OA\Response(
+     * response=409,
+     * description="Error de conflicto de negocio (El nodo tiene hijos).",
+     * @OA\JsonContent(
+     * @OA\Property(property="message", type="string", example="No se puede eliminar el nodo porque tiene hijos.")
+     * )
+     * )
+     * )
      */
     public function destroy(int $nodeId)
     {
