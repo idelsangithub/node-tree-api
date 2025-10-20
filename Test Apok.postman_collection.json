@@ -1,0 +1,174 @@
+{
+	"info": {
+		"_postman_id": "3932245e-5c8e-4430-bda9-33c17bae44dd",
+		"name": "Test Apok",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "8066934",
+		"_collection_link": "https://lunar-zodiac-231762.postman.co/workspace/My-Workspace~8056d6a2-9a25-44fa-884d-8de73c69a0d4/collection/8066934-3932245e-5c8e-4430-bda9-33c17bae44dd?action=share&source=collection_link&creator=8066934"
+	},
+	"item": [
+		{
+			"name": "http://node-tree-api.local/api/nodes/roots",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Locale",
+						"value": "es",
+						"type": "text"
+					},
+					{
+						"key": "X-Timezone",
+						"value": "America/Caracas",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://node-tree-api.local/api/nodes/roots",
+					"protocol": "http",
+					"host": [
+						"node-tree-api",
+						"local"
+					],
+					"path": [
+						"api",
+						"nodes",
+						"roots"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://node-tree-api.local/api/nodes/1/children?per_page=1&depth=1",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Locale",
+						"value": "en",
+						"type": "text"
+					},
+					{
+						"key": "X-Timezone",
+						"value": "UTC",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://node-tree-api.local/api/nodes/1/children?per_page=1&depth=1",
+					"protocol": "http",
+					"host": [
+						"node-tree-api",
+						"local"
+					],
+					"path": [
+						"api",
+						"nodes",
+						"1",
+						"children"
+					],
+					"query": [
+						{
+							"key": "per_page",
+							"value": "1"
+						},
+						{
+							"key": "depth",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://node-tree-api.local/api/nodes",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Locale",
+						"value": "en",
+						"type": "text"
+					},
+					{
+						"key": "X-Timezone",
+						"value": "UTC",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"parent_id\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://node-tree-api.local/api/nodes",
+					"protocol": "http",
+					"host": [
+						"node-tree-api",
+						"local"
+					],
+					"path": [
+						"api",
+						"nodes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://node-tree-api.local/api/nodes/1",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "X-Locale",
+						"value": "en",
+						"type": "text"
+					},
+					{
+						"key": "X-Timezone",
+						"value": "UTC",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"parent_id\": 4\r\n}"
+				},
+				"url": {
+					"raw": "http://node-tree-api.local/api/nodes/1",
+					"protocol": "http",
+					"host": [
+						"node-tree-api",
+						"local"
+					],
+					"path": [
+						"api",
+						"nodes",
+						"1"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
