@@ -81,16 +81,30 @@ class NodeService
     // Aquí implementamos solo el caso directo (depth=1) como requisito mínimo.
     public function listChildren(int $parentId, string $locale, string $timezone, int $perPage, int $depth = 1): LengthAwarePaginator
     {
-        // Requisito: Si no se pasa depth, o es 1, devolver solo hijos directos
-        if ($depth === 1) {
-            $nodes = $this->nodeRepository->getChildren($parentId, $perPage);
-        } else {
-            // Lógica compleja de profundidad no implementada aquí por simplicidad,
-            // pero el service es el lugar correcto para implementar la consulta recursiva.
-            // Para la demo, se devolverá solo el nivel 1.
-            $nodes = $this->nodeRepository->getChildren($parentId, $perPage);
+        // 1. Verificar existencia del nodo padre
+        if (!$this->nodeRepository->find($parentId)) {
+            throw new \Illuminate\Database\Eloquent\ModelNotFoundException("Nodo con ID {$parentId} no encontrado.");
         }
 
+        if ($depth === 1) {
+            // Caso A: Hijos directos (usa el método original paginado)
+            $nodes = $this->nodeRepository->getChildren($parentId, $perPage);
+        } else {
+            // Caso B: Profundidad > 1 (recursividad en PHP)
+
+            // 2. Recolectar TODOS los IDs de los descendientes hasta la profundidad
+            $descendantIds = $this->getAllDescendantIds($parentId, $depth);
+
+            if (empty($descendantIds)) {
+                // Si no hay descendientes, devolvemos una colección paginada vacía
+                return new \Illuminate\Pagination\LengthAwarePaginator([], 0, $perPage);
+            }
+
+            // 3. Obtener la colección paginada de todos los descendientes
+            $nodes = $this->nodeRepository->getNodesByIds($descendantIds, $perPage);
+        }
+
+        // 4. Formatear y devolver los nodos (lógica de traducción/timezone)
         return $this->formatNodes($nodes, $locale, $timezone);
     }
 
@@ -103,5 +117,34 @@ class NodeService
         }
 
         return $this->nodeRepository->delete($nodeId);
+    }
+
+    /**
+     * Función auxiliar para obtener todos los IDs descendientes hasta una profundidad dada.
+     */
+
+    protected function getAllDescendantIds(int $parentId, int $maxDepth, int $currentDepth = 1): array
+    {
+        $allIds = [];
+
+        if ($currentDepth > $maxDepth) {
+            return $allIds;
+        }
+
+        // 1. Obtener los IDs de los hijos directos
+        $childrenIds = $this->nodeRepository->getChildIds($parentId);
+
+        $allIds = array_merge($allIds, $childrenIds);
+
+        // 2. Si aún no hemos alcanzado la profundidad máxima, llamar recursivamente
+        if ($currentDepth < $maxDepth) {
+            foreach ($childrenIds as $childId) {
+                // Llamada recursiva
+                $descendantIds = $this->getAllDescendantIds($childId, $maxDepth, $currentDepth + 1);
+                $allIds = array_merge($allIds, $descendantIds);
+            }
+        }
+
+        return $allIds;
     }
 }

@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\NodeService;
-use Illuminate\Validation\ValidationException;
+use App\Http\Requests\StoreNodeRequest;
+use App\Http\Requests\ListRootsRequest;
+use App\Http\Requests\ListChildrenRequest;
+use App\Http\Requests\DestroyNodeRequest;
 
 /**
  * @OA\Info(
@@ -78,14 +81,11 @@ class NodeController extends Controller
      * )
      * )
      */
-    public function store(Request $request)
+    public function store(StoreNodeRequest $request)
     {
-        $request->validate([
-            'parent_id' => 'nullable|exists:nodes,id',
-        ]);
 
         try {
-            $node = $this->nodeService->createNode($request->all());
+            $node = $this->nodeService->createNode($request->validated());
             return response()->json([
                 'message' => 'Nodo creado exitosamente.',
                 'node_id' => $node->id
@@ -129,10 +129,10 @@ class NodeController extends Controller
      * )
      * )
      */
-    public function listRoots(Request $request)
+    public function listRoots(ListRootsRequest $request)
     {
         $context = $this->getRequestContext($request);
-        $perPage = $request->get('per_page', 15);
+        $perPage = $request->validated('per_page', 15);
 
         $nodes = $this->nodeService->listRootNodes($context['locale'], $context['timezone'], $perPage);
 
@@ -186,17 +186,20 @@ class NodeController extends Controller
      * )
      * )
      */
-    public function listChildren(Request $request, int $nodeId)
+    public function listChildren(ListChildrenRequest $request, int $nodeId)
     {
         $context = $this->getRequestContext($request);
-        $perPage = $request->get('per_page', 15);
-        $depth = (int) $request->get('depth', 1); // Profundidad, default 1 (directos)
+        $perPage = $request->validated('per_page', 15);
+        $depth = $request->validated('depth', 1); // Profundidad, default 1 (directos)
 
         try {
             $nodes = $this->nodeService->listChildren($nodeId, $context['locale'], $context['timezone'], $perPage, $depth);
             return response()->json($nodes);
-        } catch (\Exception $e) {
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        // Capturar la excepción lanzada por el Service
             return response()->json(['message' => 'Nodo padre no encontrado.'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al listar nodos hijos.'], 500);
         }
     }
 
@@ -241,13 +244,15 @@ class NodeController extends Controller
             if ($this->nodeService->deleteNode($nodeId)) {
                 return response()->json(['message' => 'Nodo eliminado exitosamente.'], 200);
             }
-            return response()->json(['message' => 'Nodo no encontrado.'], 404);
+
+        return response()->json(['message' => 'Nodo no encontrado.'], 404);
         } catch (\Exception $e) {
             // Error de negocio: tiene hijos
-            if ($e->getMessage() === 'No se puede eliminar el nodo porque tiene hijos.') {
-                return response()->json(['message' => $e->getMessage()], 409); // 409 Conflict
-            }
-            return response()->json(['message' => 'Error al eliminar el nodo.'], 500);
+        if ($e->getMessage() === 'No se puede eliminar el nodo porque tiene hijos.') {
+            return response()->json(['message' => $e->getMessage()], 409); // 409 Conflict
+        }
+        // Error genérico
+        return response()->json(['message' => 'Error al eliminar el nodo.'], 500);
         }
     }
 }

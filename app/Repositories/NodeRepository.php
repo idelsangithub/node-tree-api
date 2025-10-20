@@ -27,13 +27,27 @@ class NodeRepository
     {
         return Node::find($id);
     }
-    
+
     // 3. Listar nodos raíz (paginados)
     public function getRootNodes(int $perPage = 15)
     {
         return Node::whereNull('parent_id')
                    ->with('translations') // Carga eager loading de las traducciones
                    ->paginate($perPage);
+    }
+    // Método para obtener los IDs de los hijos de un nodo (directos)
+    public function getChildIds(int $parentId): array
+    {
+        // Obtiene solo los IDs de los hijos directos
+        return Node::where('parent_id', $parentId)->pluck('id')->toArray();
+    }
+    // Método para obtener nodos por un array de IDs (para paginación)
+    public function getNodesByIds(array $ids, int $perPage)
+    {
+        // Carga los nodos de la lista de IDs, paginados y con traducciones
+        return Node::whereIn('id', $ids)
+                ->with('translations')
+                ->paginate($perPage);
     }
 
     // 4. Listar hijos directos (paginados)
