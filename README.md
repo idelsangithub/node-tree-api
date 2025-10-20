@@ -17,8 +17,12 @@ Asegúrate de tener instalado:
 
 Sigue estos pasos para poner en marcha el proyecto:
 
-### 2.1. Clonar el Repositorio
+## 2.1. Clonar el Repositorio
 
 ```bash
-git clone [https://github.com/TU-USUARIO/NOMBRE-DEL-REPOSITORIO.git](https://github.com/TU-USUARIO/NOMBRE-DEL-REPOSITORIO.git)
-cd NOMBRE-DEL-REPOSITORIO
+git clone https://github.com/idelsangithub/node-tree-api.git
+cd node-tree-api
+
+
+
+
