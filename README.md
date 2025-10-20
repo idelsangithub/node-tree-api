@@ -29,7 +29,7 @@ composer install
 2.3. Configurar el Entorno
     * Copia el archivo de configuración: cp .env.example .env
     * Genera la clave de aplicación:php artisan key:generate
-### 3. Configura la Base de Datos Edita el archivo .env y rellena las credenciales (DB_DATABASE, DB_USERNAME, DB_PASSWORD)
+### 3. Configura la Base de Datos Edita el archivo .env y rellena las credenciales (DB_DATABASE = node_tree_db , DB_USERNAME = root, DB_PASSWORD)
 Ejecuta: php artisan migrate:fresh --seed   --Esto creará las tablas (nodes, node_translations) y precargará una estructura de árbol inicial con traducciones
 
 Acceder a la Documentación (Swagger UI)
