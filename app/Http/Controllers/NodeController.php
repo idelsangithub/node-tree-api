@@ -9,26 +9,7 @@ use App\Http\Requests\ListRootsRequest;
 use App\Http\Requests\ListChildrenRequest;
 use App\Http\Requests\DestroyNodeRequest;
 
-/**
- * @OA\Info(
- * version="1.0.0",
- * title="Node Tree API Documentation",
- * description="API RESTful para la gestión de un árbol de nodos.",
- * @OA\Contact(
- * email="idelfonsosanchez.snchez.com"
- * )
- * )
- *
- * @OA\Server(
- * url=L5_SWAGGER_CONST_HOST,
- * description="Servidor de la API del Árbol de Nodos"
- * )
- *
- * @OA\Tag(
- * name="Nodos",
- * description="Operaciones sobre la estructura de nodos del árbol"
- * )
- */
+
 
 class NodeController extends Controller
 {
@@ -56,29 +37,16 @@ class NodeController extends Controller
     /**
      * @OA\Post(
      * path="/api/nodes",
-     * operationId="createNode",
      * tags={"Nodos"},
-     * summary="Crea un nuevo nodo en el árbol",
+     * summary="Crear un nuevo nodo",
      * @OA\RequestBody(
-     * required=false,
-     * description="ID del nodo padre (opcional).",
+     * required=true,
      * @OA\JsonContent(
-     * required={"parent_id"},
-     * @OA\Property(property="parent_id", type="integer", example=1, description="ID del nodo padre. Puede ser nulo para crear un nodo raíz.")
+     * @OA\Property(property="parent_id", type="integer", nullable=true, example=1)
      * )
      * ),
-     * @OA\Response(
-     * response=201,
-     * description="Nodo creado exitosamente.",
-     * @OA\JsonContent(
-     * @OA\Property(property="message", type="string", example="Nodo creado exitosamente."),
-     * @OA\Property(property="node_id", type="integer", example=5)
-     * )
-     * ),
-     * @OA\Response(
-     * response=422,
-     * description="Error de validación."
-     * )
+     * @OA\Response(response=201, description="Nodo creado exitosamente."),
+     * @OA\Response(response=422, description="Error de validación.")
      * )
      */
     public function store(StoreNodeRequest $request)
@@ -95,40 +63,20 @@ class NodeController extends Controller
         }
     }
 
-    /**
-     * @OA\Get(
-     * path="/api/nodes/roots",
-     * operationId="listRootNodes",
-     * tags={"Nodos"},
-     * summary="Lista todos los nodos raíz (sin padre).",
-     * @OA\Parameter(
-     * name="per_page",
-     * in="query",
-     * required=false,
-     * description="Cantidad de resultados por página.",
-     * @OA\Schema(type="integer", default=15)
-     * ),
-     * @OA\Parameter(
-     * name="X-Locale",
-     * in="header",
-     * required=false,
-     * description="Idioma ISO 639-1 para traducir el campo 'title' (ej: 'es', 'en').",
-     * @OA\Schema(type="string", default="en")
-     * ),
-     * @OA\Parameter(
-     * name="X-Timezone",
-     * in="header",
-     * required=false,
-     * description="Zona horaria IANA para formatear el campo 'created_at' (ej: 'America/Santiago', 'UTC').",
-     * @OA\Schema(type="string", default="UTC")
-     * ),
-     * @OA\Response(
-     * response=200,
-     * description="Lista paginada de nodos raíz.",
-     * @OA\JsonContent(ref="#/components/schemas/PaginatedNodeList")
-     * )
-     * )
-     */
+   /**
+    * @OA\Get(
+    * path="/api/nodes/roots",
+    * tags={"Nodos"},
+    * summary="Listar todos los nodos raíz (sin parent_id)",
+    * @OA\Parameter(
+    * name="per_page",
+    * in="query",
+    * @OA\Schema(type="integer"),
+    * description="Elementos por página.",
+    * ),
+    * @OA\Response(response=200, description="Lista de nodos raíz paginada.")
+    * )
+    */
     public function listRoots(ListRootsRequest $request)
     {
         $context = $this->getRequestContext($request);
@@ -144,46 +92,23 @@ class NodeController extends Controller
     /**
      * @OA\Get(
      * path="/api/nodes/{nodeId}/children",
-     * operationId="listChildren",
      * tags={"Nodos"},
-     * summary="Lista los nodos hijos de un nodo padre específico.",
+     * summary="Listar hijos y descendientes hasta la profundidad (depth) indicada",
      * @OA\Parameter(
      * name="nodeId",
      * in="path",
      * required=true,
-     * description="ID del nodo padre del que se listarán los hijos.",
-     * @OA\Schema(type="integer", example=1)
+     * @OA\Schema(type="integer"),
+     * description="ID del nodo padre.",
      * ),
      * @OA\Parameter(
      * name="depth",
      * in="query",
-     * required=false,
-     * description="Profundidad de navegación. Si no se pasa o es 1, devuelve solo hijos directos.",
-     * @OA\Schema(type="integer", default=1, enum={1, 2, 3})
+     * @OA\Schema(type="integer", default=1),
+     * description="Profundidad máxima de descendencia a buscar (1 para solo hijos directos).",
      * ),
-     * @OA\Parameter(
-     * name="X-Locale",
-     * in="header",
-     * required=false,
-     * description="Idioma ISO 639-1 para traducir el campo 'title'.",
-     * @OA\Schema(type="string", default="en")
-     * ),
-     * @OA\Parameter(
-     * name="X-Timezone",
-     * in="header",
-     * required=false,
-     * description="Zona horaria IANA para formatear el campo 'created_at'.",
-     * @OA\Schema(type="string", default="UTC")
-     * ),
-     * @OA\Response(
-     * response=200,
-     * description="Lista paginada de nodos hijos.",
-     * @OA\JsonContent(ref="#/components/schemas/PaginatedNodeList")
-     * ),
-     * @OA\Response(
-     * response=404,
-     * description="Nodo padre no encontrado."
-     * )
+     * @OA\Response(response=200, description="Lista de descendientes paginada."),
+     * @OA\Response(response=404, description="Nodo padre no encontrado.")
      * )
      */
     public function listChildren(ListChildrenRequest $request, int $nodeId)

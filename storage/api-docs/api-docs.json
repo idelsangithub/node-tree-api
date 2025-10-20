@@ -1,17 +1,14 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "Node Tree API Documentation",
-        "description": "API RESTful para la gestión de un árbol de nodos.",
-        "contact": {
-            "email": "idelfonsosanchez.snchez.com"
-        },
+        "title": "Node Tree API",
+        "description": "API para la gestión de una estructura de árbol de nodos.",
         "version": "1.0.0"
     },
     "servers": [
         {
             "url": "http://my-default-host.com",
-            "description": "Servidor de la API del Árbol de Nodos"
+            "description": "Servidor de Desarrollo"
         }
     ],
     "paths": {
@@ -20,22 +17,18 @@
                 "tags": [
                     "Nodos"
                 ],
-                "summary": "Crea un nuevo nodo en el árbol",
-                "operationId": "createNode",
+                "summary": "Crear un nuevo nodo",
+                "operationId": "cfafd706d8524f357d2d40d0c7747598",
                 "requestBody": {
-                    "description": "ID del nodo padre (opcional).",
-                    "required": false,
+                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "parent_id"
-                                ],
                                 "properties": {
                                     "parent_id": {
-                                        "description": "ID del nodo padre. Puede ser nulo para crear un nodo raíz.",
                                         "type": "integer",
-                                        "example": 1
+                                        "example": 1,
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -45,18 +38,105 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Nodo creado exitosamente.",
+                        "description": "Nodo creado exitosamente."
+                    },
+                    "422": {
+                        "description": "Error de validación."
+                    }
+                }
+            }
+        },
+        "/api/nodes/roots": {
+            "get": {
+                "tags": [
+                    "Nodos"
+                ],
+                "summary": "Listar todos los nodos raíz (sin parent_id)",
+                "operationId": "b5c93f5e3426509a8e5c610ef1261c8e",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Elementos por página.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de nodos raíz paginada."
+                    }
+                }
+            }
+        },
+        "/api/nodes/{nodeId}/children": {
+            "get": {
+                "tags": [
+                    "Nodos"
+                ],
+                "summary": "Listar hijos y descendientes hasta la profundidad (depth) indicada",
+                "operationId": "c8df4e31d45d44ffaf201fb9fa7f9e0a",
+                "parameters": [
+                    {
+                        "name": "nodeId",
+                        "in": "path",
+                        "description": "ID del nodo padre.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "depth",
+                        "in": "query",
+                        "description": "Profundidad máxima de descendencia a buscar (1 para solo hijos directos).",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de descendientes paginada."
+                    },
+                    "404": {
+                        "description": "Nodo padre no encontrado."
+                    }
+                }
+            }
+        },
+        "/api/nodes/{nodeId}": {
+            "delete": {
+                "tags": [
+                    "Nodos"
+                ],
+                "summary": "Elimina un nodo específico.",
+                "description": "Solo se puede eliminar un nodo si NO tiene hijos.",
+                "operationId": "deleteNode",
+                "parameters": [
+                    {
+                        "name": "nodeId",
+                        "in": "path",
+                        "description": "ID del nodo a eliminar.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 3
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Nodo eliminado exitosamente.",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "example": "Nodo creado exitosamente."
-                                        },
-                                        "node_id": {
-                                            "type": "integer",
-                                            "example": 5
+                                            "example": "Nodo eliminado exitosamente."
                                         }
                                     },
                                     "type": "object"
@@ -64,8 +144,24 @@
                             }
                         }
                     },
-                    "422": {
-                        "description": "Error de validación."
+                    "404": {
+                        "description": "Nodo no encontrado."
+                    },
+                    "409": {
+                        "description": "Error de conflicto de negocio (El nodo tiene hijos).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No se puede eliminar el nodo porque tiene hijos."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -74,7 +170,7 @@
     "tags": [
         {
             "name": "Nodos",
-            "description": "Operaciones sobre la estructura de nodos del árbol"
+            "description": "Nodos"
         }
     ]
 }
